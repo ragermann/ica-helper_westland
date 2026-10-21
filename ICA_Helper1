@@ -6,7 +6,7 @@ local text_version = '1.0' -- версия для отображения; для
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
 local nametagEnabled = true -- включён до тех пор, пока сервер не сообщит об отключении
 local dlstatus = require('moonloader').download_status
-sw, sh = getScreenResolution()
+sw, sh = getScreenResolution() 
 
 local function loadLibs()
     inicfg = require 'inicfg'
@@ -1445,7 +1445,7 @@ local newFrame = imgui.OnFrame(
 -- Добавляй разрешённые номера сюда: ['30801123'] = true,
 -- Команда /ica_update регистрируется отдельно и работает даже до добавления номера.
 local ICA_ALLOWED_VOLUME_SERIALS = {
-     ['11670033'] = true,
+     ['116700331'] = true,
      ['1147764179'] = true,
 
 }

@@ -1,6 +1,6 @@
 require 'lib.sampfuncs'
 require 'lib.moonloader'
-local script_version = 005 --[[ Используется для автообновления, во избежание проблем 
+local script_version = 004 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
 local text_version = '1.0' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
@@ -1583,6 +1583,33 @@ local function icaReadVersionFromScript(source)
     return version .. ' ' .. number
 end
 
+local function icaSerialListSignatureFromSource(source)
+    if type(source) ~= 'string' then return nil end
+    local block = source:match('local%s+ICA_ALLOWED_VOLUME_SERIALS%s*=%s*{(.-)}')
+    if not block then return nil end
+    local serials = {}
+    for serial in block:gmatch("['\"](%d+)['\"]%s*=%s*true") do
+        serials[#serials + 1] = serial
+    end
+    table.sort(serials)
+    return table.concat(serials, ',')
+end
+
+local function icaLocalSerialListSignature()
+    local serials = {}
+    for serial, allowed in pairs(ICA_ALLOWED_VOLUME_SERIALS) do
+        if allowed == true then serials[#serials + 1] = tostring(serial) end
+    end
+    table.sort(serials)
+    return table.concat(serials, ',')
+end
+
+local function icaRemoteAccessListChanged(source)
+    local remoteSignature = icaSerialListSignatureFromSource(source)
+    if remoteSignature == nil then return false end
+    return remoteSignature ~= icaLocalSerialListSignature()
+end
+
 local function icaInstallUpdate()
     lua_thread.create(function()
         sampAddChatMessage('{FFFFFF}[ICA Helper] Скачиваю обновление с GitHub...', -1)
@@ -1633,12 +1660,14 @@ local function icaInstallUpdate()
             return
         end
 
-        -- Устанавливаем файл только если на GitHub опубликована версия новее.
-        -- Добавление серийника без повышения версии не меняет установленный скрипт.
+        -- Устанавливаем файл, если повысилась версия ИЛИ изменился список серийных номеров.
+        -- Поэтому добавление нового пользователя на GitHub само по себе запускает обновление для всех.
         local latestVersion = icaReadVersionFromScript(downloaded)
         local currentVersion = tostring(text_version) .. ' ' .. tostring(script_version)
-        if not latestVersion or not icaVersionGreater(latestVersion, currentVersion) then
-            sampAddChatMessage('{FFFF00}[ICA Helper] Нового обновления пока нет. Дождитесь сообщения о выходе новой версии.', -1)
+        local versionChanged = latestVersion and icaVersionGreater(latestVersion, currentVersion)
+        local accessListChanged = icaRemoteAccessListChanged(downloaded)
+        if not versionChanged and not accessListChanged then
+            sampAddChatMessage('{FFFF00}[ICA Helper] Нет новой версии и список доступа не изменился.', -1)
             os.remove(tempPath)
             return
         end
@@ -1741,9 +1770,14 @@ local function icaCheckForUpdates()
         local latestVersion = icaReadVersionFromScript(source)
         local currentVersion = tostring(text_version) .. ' ' .. tostring(script_version)
         local versionChanged = latestVersion and icaVersionGreater(latestVersion, currentVersion)
-        if versionChanged then
-            sampAddChatMessage('{00BFFF}[ICA Helper] Доступно обновление ('..latestVersion..').', -1)
-            sampAddChatMessage('{FFFFFF}Для установки введите {00FF00}/ica_update{FFFFFF}.', -1)
+        local accessListChanged = icaRemoteAccessListChanged(source)
+        if versionChanged or accessListChanged then
+            if versionChanged then
+                sampAddChatMessage('{00BFFF}[ICA Helper] Доступно обновление версии ('..latestVersion..').', -1)
+            else
+                sampAddChatMessage('{00BFFF}[ICA Helper] Список доступа обновлён на GitHub.', -1)
+            end
+            sampAddChatMessage('{FFFFFF}Для установки изменений введите {00FF00}/ica_update{FFFFFF}.', -1)
         end
     end)
 end
@@ -1769,6 +1803,14 @@ function main()
         end
     end)
     icaCheckForUpdates()
+    -- Периодически проверяем GitHub, чтобы игроки, уже находящиеся в игре,
+    -- увидели изменение списка доступа без перезапуска игры.
+    lua_thread.create(function()
+        while true do
+            wait(300000) -- 5 минут
+            icaCheckForUpdates()
+        end
+    end)
     icaWaitForDriveAuthorization()
     changelog = [[{cc0000}Версия 2.6{ffffff}
     - Фиксы под сампик роле плау =/

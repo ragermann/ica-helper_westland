@@ -1,6 +1,6 @@
 require 'lib.sampfuncs'
 require 'lib.moonloader'
-local script_version = 123 --[[ Используется для автообновления, во избежание проблем 
+local script_version = 122 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
 local text_version = '3.5' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
@@ -1768,7 +1768,7 @@ local ICA_ACTIVATION_KEYS = {
 local ICA_ACTIVATION_PATH = getWorkingDirectory() .. '/config/ICA Helper/ica_activation.dat'
 
 -- Автообновление использует только один источник: актуальный Lua-файл на GitHub.
-local ICA_UPDATE_SCRIPT_URL = 'https://github.com/ragermann/ica-helper_westland/raw/refs/heads/main/ICA_Helper_GoogleDrive_repaired_cp1251.lua'
+local ICA_UPDATE_SCRIPT_URL = 'https://raw.githubusercontent.com/ragermann/ica-helper_westland/main/ICA_Helper_GoogleDrive_repaired_cp1251.lua'
 local ICA_UPDATE_TEMP_PATH = getWorkingDirectory() .. '/config/ICA Helper/ICA_Helper.lua.update'
 
 local function icaReadActivation()
@@ -1889,7 +1889,15 @@ local function icaInstallUpdate()
         local done, status = false, nil
         local downloadOk, downloadErr = pcall(function()
             downloadUrlToFile(ICA_UPDATE_SCRIPT_URL, tempPath, function(id, s)
-                done, status = true, s
+                -- downloadUrlToFile вызывает callback несколько раз; завершаем ожидание
+                -- только на конечном статусе, а не на первом событии загрузки.
+                if s == dlstatus.STATUS_ENDDOWNLOADDATA or s == dlstatus.STATUSEX_ENDDOWNLOAD then
+                    -- В разных сборках MoonLoader успешное завершение может приходить
+                    -- под одним из этих статусов; проверяем содержимое файла ниже.
+                    done, status = true, true
+                elseif s == dlstatus.STATUS_ERROR then
+                    done, status = true, false
+                end
             end)
         end)
         if not downloadOk then
@@ -1905,7 +1913,7 @@ local function icaInstallUpdate()
             os.remove(tempPath)
             return
         end
-        if status ~= nil and status ~= dlstatus.STATUS_SUCCESS then
+        if status ~= true then
             sampAddChatMessage('{B22222}[ICA Helper] Не удалось скачать файл с GitHub.', -1)
             os.remove(tempPath)
             return
@@ -1955,7 +1963,14 @@ local function icaCheckForUpdates()
         local finished, result = false, nil
         local ok, err = pcall(function()
             downloadUrlToFile(ICA_UPDATE_SCRIPT_URL, checkPath, function(id, status)
-                finished, result = true, status
+                -- Не считаем STATUS_DOWNLOADINGDATA завершением запроса.
+                if status == dlstatus.STATUS_ENDDOWNLOADDATA or status == dlstatus.STATUSEX_ENDDOWNLOAD then
+                    -- Считаем оба варианта конечного события завершением;
+                    -- реальный успех подтверждается чтением и проверкой файла.
+                    finished, result = true, true
+                elseif status == dlstatus.STATUS_ERROR then
+                    finished, result = true, false
+                end
             end)
         end)
         if not ok then
@@ -1970,7 +1985,7 @@ local function icaCheckForUpdates()
             sampAddChatMessage('{B22222}[ICA Helper] Не удалось проверить обновления: тайм-аут GitHub.', -1)
             return
         end
-        if result ~= nil and result ~= dlstatus.STATUS_SUCCESS then
+        if result ~= true then
             os.remove(checkPath)
             sampAddChatMessage('{B22222}[ICA Helper] Не удалось получить файл с GitHub.', -1)
             return

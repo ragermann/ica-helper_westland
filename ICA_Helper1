@@ -1,6 +1,6 @@
 require 'lib.sampfuncs'
 require 'lib.moonloader'
-local script_version = 004 --[[ Используется для автообновления, во избежание проблем 
+local script_version = 005 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
 local text_version = '1.0' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
@@ -1441,414 +1441,119 @@ local newFrame = imgui.OnFrame(
     end
 )
 
--- Локальная активация ICA Helper. Ключи находятся внутри Lua-файла.
--- ВАЖНО: локальная проверка не может глобально пометить ключ использованным на других ПК.
-local ICA_ACTIVATION_KEYS = {
-    ['ICA-D8K5-KLB4-3LEW'] = true,
-    ['ICA-NESS-CMX4-DW9J'] = true,
-    ['ICA-FJTD-QY2U-5U6B'] = true,
-    ['ICA-TFXR-JGCY-2M7Q'] = false,
-    ['ICA-MRAE-KS28-LLJ2'] = false,
-    ['ICA-DMDS-2PPF-KB59'] = false,
-    ['ICA-RXZJ-2NNY-ZFCZ'] = false,
-    ['ICA-3PPW-CTR9-AUVS'] = false,
-    ['ICA-RU8K-MAFX-REPP'] = false,
-    ['ICA-868H-E2EP-FP8E'] = false,
-    ['ICA-TCQJ-L4YG-4WAS'] = false,
-    ['ICA-NMNM-BSVB-QGUX'] = false,
-    ['ICA-8KS8-8XNX-3F5X'] = false,
-    ['ICA-AU9V-KXDE-3GGP'] = false,
-    ['ICA-QJDE-K79Q-9XZA'] = false,
-    ['ICA-884W-TFZK-NYKN'] = false,
-    ['ICA-9PKY-8VBE-3JA9'] = false,
-    ['ICA-AZ3F-ZRBT-8BMP'] = false,
-    ['ICA-SH67-SS6J-JTXG'] = false,
-    ['ICA-4DRE-3DDC-V52P'] = false,
-    ['ICA-TAPL-TWGG-FAB3'] = false,
-    ['ICA-D2YE-4N4T-3JRM'] = false,
-    ['ICA-XECG-52FK-U7EN'] = false,
-    ['ICA-BBTH-UDDG-WLQN'] = false,
-    ['ICA-FVGR-H66L-RCTP'] = false,
-    ['ICA-BXYL-ZB7T-RGB6'] = false,
-    ['ICA-KYHY-BN4B-3DRC'] = false,
-    ['ICA-FNMN-TN6N-HT73'] = false,
-    ['ICA-4XFV-CSAU-NM3M'] = false,
-    ['ICA-NWJE-WL44-GQSF'] = false,
-    ['ICA-RPLV-45LN-ZGCA'] = false,
-    ['ICA-BTQ4-C2QR-JE2S'] = false,
-    ['ICA-J6BD-HXBJ-9UK3'] = false,
-    ['ICA-96JV-2THG-MVVA'] = false,
-    ['ICA-8ZB7-FG23-HRAE'] = false,
-    ['ICA-YHZ4-V46J-G3V8'] = false,
-    ['ICA-UV5A-Q3DM-BDHE'] = false,
-    ['ICA-9BSY-H9V2-P5ZZ'] = false,
-    ['ICA-2FWQ-FLX9-K5HC'] = false,
-    ['ICA-NFG2-PPT7-3JC7'] = false,
-    ['ICA-UEJM-BWJY-4N2C'] = false,
-    ['ICA-3JYM-4E8A-7GVB'] = false,
-    ['ICA-7U9X-TTQN-339B'] = false,
-    ['ICA-PZER-BF9U-N5V7'] = false,
-    ['ICA-8EDJ-BCRW-D2TX'] = false,
-    ['ICA-5SML-HAYX-VEJL'] = false,
-    ['ICA-4MBZ-FZPS-H9W9'] = false,
-    ['ICA-8GKX-FRJE-S69M'] = false,
-    ['ICA-459R-SC53-P3P2'] = false,
-    ['ICA-GVUP-DFHV-BGAX'] = false,
-    ['ICA-CTJP-DDMJ-BW6B'] = false,
-    ['ICA-LNJN-S7LH-PPAJ'] = false,
-    ['ICA-FP98-HUND-B4EH'] = false,
-    ['ICA-Z8HK-V446-8BHZ'] = false,
-    ['ICA-Q4AV-D7F5-QGCZ'] = false,
-    ['ICA-STDL-NM4R-26JA'] = false,
-    ['ICA-8U4Z-UMH5-CZW2'] = false,
-    ['ICA-EB9N-6FGJ-Y2NE'] = false,
-    ['ICA-FC6C-FKFM-WM5W'] = false,
-    ['ICA-RHZM-RQTU-RTLR'] = false,
-    ['ICA-UNXF-NQ3B-XCZ6'] = false,
-    ['ICA-WZN6-YZHB-3M67'] = false,
-    ['ICA-5SY9-BK5P-8PZP'] = false,
-    ['ICA-FWFQ-9K7T-4GLM'] = false,
-    ['ICA-3P23-EE7A-3SXQ'] = false,
-    ['ICA-3TAX-2WQN-NA7Q'] = false,
-    ['ICA-U7B3-FKTK-JDFM'] = false,
-    ['ICA-DVCC-ZTJ9-GLJ4'] = false,
-    ['ICA-Z9FF-7SHA-EZYL'] = false,
-    ['ICA-XHXN-JYC2-RRGZ'] = false,
-    ['ICA-D57Y-DL87-ESEN'] = false,
-    ['ICA-W85E-ATS9-QP3R'] = false,
-    ['ICA-KJSA-X3RF-7J4C'] = false,
-    ['ICA-Y43G-WA83-7X7Y'] = false,
-    ['ICA-KFAM-HZT3-EZD2'] = false,
-    ['ICA-U6JJ-67FS-JUZB'] = false,
-    ['ICA-DU3K-VBKG-VML2'] = false,
-    ['ICA-JEAY-W9V3-PSET'] = false,
-    ['ICA-SCVA-HJ9Q-ZK5Q'] = false,
-    ['ICA-RU22-ZMX9-5UAH'] = false,
-    ['ICA-YXR9-JHTX-68E2'] = false,
-    ['ICA-65VR-3HN8-G29A'] = false,
-    ['ICA-BWV6-P8AD-AK3U'] = false,
-    ['ICA-PJ72-X944-ZDZN'] = false,
-    ['ICA-4KBQ-MBD3-4V35'] = false,
-    ['ICA-RCV6-RGL7-ATW7'] = false,
-    ['ICA-SV4U-LEE6-XDV3'] = false,
-    ['ICA-PCGZ-QB5B-5S5D'] = false,
-    ['ICA-QWU9-ERQU-J9F9'] = false,
-    ['ICA-BFQP-VWSU-NPSM'] = false,
-    ['ICA-RRLP-ZW3X-KAGP'] = false,
-    ['ICA-HFTW-ARUR-L7PU'] = false,
-    ['ICA-UYCC-GXCG-X84J'] = false,
-    ['ICA-RHQQ-ZKBN-EBQ8'] = false,
-    ['ICA-GCZB-ZXHJ-BG4F'] = false,
-    ['ICA-JAYM-C53K-378T'] = false,
-    ['ICA-2KSQ-FRNH-DLL9'] = false,
-    ['ICA-E8YB-3XUJ-PWRY'] = false,
-    ['ICA-NBGW-ULDQ-XBHW'] = false,
-    ['ICA-VPE7-GVLX-JFHS'] = false,
-    ['ICA-FNPS-GC9B-J64T'] = false,
-    ['ICA-8ER2-D87A-GNWC'] = false,
-    ['ICA-ZCUC-2JLC-VQE7'] = false,
-    ['ICA-XK8C-MBBW-6GN6'] = false,
-    ['ICA-8VWE-PFAT-874B'] = false,
-    ['ICA-3F93-KP94-7753'] = false,
-    ['ICA-5KZV-5HQX-N37D'] = false,
-    ['ICA-X7WB-FWK6-4V9J'] = false,
-    ['ICA-EEXQ-8FJX-AMKW'] = false,
-    ['ICA-YVAU-QTUC-AAUB'] = false,
-    ['ICA-8E3W-7L56-SLCP'] = false,
-    ['ICA-PTSB-255W-LVDU'] = false,
-    ['ICA-LPGH-RTY9-UL6L'] = false,
-    ['ICA-5F9U-RMT3-C499'] = false,
-    ['ICA-BQTY-SMZ4-5K4V'] = false,
-    ['ICA-3KX6-GYGG-JJLR'] = false,
-    ['ICA-EFUG-BR9N-GSXP'] = false,
-    ['ICA-97J8-SHMW-YW9E'] = false,
-    ['ICA-UZZV-XTTF-R7RK'] = false,
-    ['ICA-JYPA-NKGS-8QQ2'] = false,
-    ['ICA-6WMD-CRH7-NSHG'] = false,
-    ['ICA-BQFD-HUDR-GD4A'] = false,
-    ['ICA-JFWY-HQHQ-EVYE'] = false,
-    ['ICA-72EH-ZMPW-RU3N'] = false,
-    ['ICA-MT72-24MC-AFTU'] = false,
-    ['ICA-RTRP-VLKU-P79N'] = false,
-    ['ICA-3GJT-TNRS-F4WE'] = false,
-    ['ICA-CNVC-2PAG-E56D'] = false,
-    ['ICA-L8BP-K3WR-XQMN'] = false,
-    ['ICA-CJ9C-Y2UJ-89HS'] = false,
-    ['ICA-53BX-QR6S-E7AM'] = false,
-    ['ICA-LMCW-GTF2-EW82'] = false,
-    ['ICA-APPF-UQU7-5YGT'] = false,
-    ['ICA-TWTK-NVFG-Z74F'] = false,
-    ['ICA-YNYG-XJFM-LZ7Y'] = false,
-    ['ICA-XUET-ZDN4-22H9'] = false,
-    ['ICA-EKR4-KXS3-LJZP'] = false,
-    ['ICA-KL4X-MQS2-YN8P'] = false,
-    ['ICA-JHGU-ADKD-9WYN'] = false,
-    ['ICA-5BPR-L64V-XC7G'] = false,
-    ['ICA-JZ8W-JAAA-PN37'] = false,
-    ['ICA-3S2M-BUQH-TX4A'] = false,
-    ['ICA-CAAW-QKXB-WNX6'] = false,
-    ['ICA-76XP-NCTE-8LQU'] = false,
-    ['ICA-KBFJ-MXCB-YT2J'] = false,
-    ['ICA-PFFM-M9D5-EN4G'] = false,
-    ['ICA-44K7-Q8HW-PKJ3'] = false,
-    ['ICA-B66T-GRXF-GW3K'] = false,
-    ['ICA-F6RF-LAJC-SV7M'] = false,
-    ['ICA-HJSY-NYF8-Q8MR'] = false,
-    ['ICA-6UJ5-ATPW-JT23'] = false,
-    ['ICA-7PQX-TCM8-8KHA'] = false,
-    ['ICA-K86R-HMTN-AKT2'] = false,
-    ['ICA-L9R5-KUYE-24PN'] = false,
-    ['ICA-XQ58-PCDU-BLQY'] = false,
-    ['ICA-ZUZ6-FMDE-36A7'] = false,
-    ['ICA-NM98-W9A8-P8LD'] = false,
-    ['ICA-4H3H-VCVT-FSRH'] = false,
-    ['ICA-GQD9-W5HE-CY9L'] = false,
-    ['ICA-RE4L-BRSG-CHYS'] = false,
-    ['ICA-CYEP-HQM7-VLWN'] = false,
-    ['ICA-8CBB-CFH4-UP9N'] = false,
-    ['ICA-Q6K2-ABMD-YWAU'] = false,
-    ['ICA-QD95-A9VL-TUDW'] = false,
-    ['ICA-KYQ6-VY9L-V88F'] = false,
-    ['ICA-KBTH-ZZUV-S2JJ'] = false,
-    ['ICA-Q9HS-LGUB-LP98'] = false,
-    ['ICA-PYL8-RGSV-RQWY'] = false,
-    ['ICA-N55V-6N3Q-9N78'] = false,
-    ['ICA-SXN4-USGS-STL8'] = false,
-    ['ICA-N4SJ-9EXY-ED2P'] = false,
-    ['ICA-RCRM-7JU2-66VE'] = false,
-    ['ICA-YJMS-HF58-YBJC'] = false,
-    ['ICA-KZSG-LSPF-4YRZ'] = false,
-    ['ICA-YGQ8-3JM4-HRCJ'] = false,
-    ['ICA-ZDRS-AVC7-QMNM'] = false,
-    ['ICA-58AV-52LE-7QWF'] = false,
-    ['ICA-B67K-4YRD-3N62'] = false,
-    ['ICA-WH4L-QFJX-9P3M'] = false,
-    ['ICA-YRBR-EM8U-NL9W'] = false,
-    ['ICA-Y7CQ-S98Q-K7W2'] = false,
-    ['ICA-P49M-VXF3-RHN6'] = false,
-    ['ICA-J8QJ-6Z9F-JWJG'] = false,
-    ['ICA-66FQ-T7WK-B845'] = false,
-    ['ICA-87YM-YETH-RWPD'] = false,
-    ['ICA-SL2S-4YDQ-7TDG'] = false,
-    ['ICA-CV8A-YVL3-R5MD'] = false,
-    ['ICA-FJWN-8YRC-2WMH'] = false,
-    ['ICA-XMB5-WXLV-BXZN'] = false,
-    ['ICA-JJM7-7ZYD-8NC3'] = false,
-    ['ICA-H5HW-FWQH-T8HM'] = false,
-    ['ICA-X865-2EAZ-ZUDV'] = false,
-    ['ICA-VD98-VZKG-DMUQ'] = false,
-    ['ICA-MMGF-9SYB-5EAJ'] = false,
-    ['ICA-RY9C-DEBA-445J'] = false,
-    ['ICA-ER8M-GLGF-9PPV'] = false,
-    ['ICA-RHXB-ASR6-LBT2'] = false,
-    ['ICA-T28X-R3LW-49SM'] = false,
-    ['ICA-EH4E-CW6P-L6KF'] = false,
-    ['ICA-T7K4-CAMT-5PUN'] = false,
-    ['ICA-2VRA-VCK9-QLM9'] = false,
-    ['ICA-BYFC-W98F-GAU3'] = false,
-    ['ICA-FAVJ-VKNZ-T4FF'] = false,
-    ['ICA-4DCC-8TAD-H6PV'] = false,
-    ['ICA-7VG2-3AU6-5CAL'] = false,
-    ['ICA-B8TZ-XY3L-WGHT'] = false,
-    ['ICA-NUT6-HJKW-E84K'] = false,
-    ['ICA-4NYE-N3CR-EAFY'] = false,
-    ['ICA-DJQL-6RX5-JUKX'] = false,
-    ['ICA-QCZ3-5UXC-NTL6'] = false,
-    ['ICA-Q492-PCEY-5G7V'] = false,
-    ['ICA-9XR2-8KPD-VSTS'] = false,
-    ['ICA-6L54-UUS8-W577'] = false,
-    ['ICA-NC4W-VQRW-PRP4'] = false,
-    ['ICA-39RT-39JN-NUXS'] = false,
-    ['ICA-Q5XB-DAJ4-MRJ2'] = false,
-    ['ICA-D6ZN-S823-JKGF'] = false,
-    ['ICA-SJ8D-3Z3J-SQGG'] = false,
-    ['ICA-2FHT-PLDE-KZR3'] = false,
-    ['ICA-88SM-AFPP-HMRN'] = false,
-    ['ICA-6D8K-9MTN-4LKY'] = false,
-    ['ICA-P5LW-ZRUB-86XW'] = false,
-    ['ICA-EZCK-3AR7-ZCBS'] = false,
-    ['ICA-9PKG-HE98-FNJW'] = false,
-    ['ICA-4QRM-FRYY-NZ4S'] = false,
-    ['ICA-KDD5-7EZ3-VCRV'] = false,
-    ['ICA-RMN9-94GW-YQ3L'] = false,
-    ['ICA-S2FH-GKMA-TQ8C'] = false,
-    ['ICA-ZR3G-V776-V7WF'] = false,
-    ['ICA-BG6J-K9YQ-GBNK'] = false,
-    ['ICA-UTUZ-DR6A-ZDEE'] = false,
-    ['ICA-BKHN-LE24-L384'] = false,
-    ['ICA-VNHF-NSX9-D9BH'] = false,
-    ['ICA-8ZMW-VXLH-PCTV'] = false,
-    ['ICA-CM88-3HJN-S7MB'] = false,
-    ['ICA-CRU4-DU76-LZK3'] = false,
-    ['ICA-3WZ6-F2DC-UG76'] = false,
-    ['ICA-92Y9-HEJE-TMAF'] = false,
-    ['ICA-W259-SQ96-AX2C'] = false,
-    ['ICA-YY4M-WGRP-B5LK'] = false,
-    ['ICA-GJWA-2MXE-MR5Y'] = false,
-    ['ICA-77LA-W5Q6-HN6K'] = false,
-    ['ICA-NAL3-KC4N-UTD4'] = false,
-    ['ICA-D5SQ-3XR8-BL7Z'] = false,
-    ['ICA-AX7L-G597-7WWS'] = false,
-    ['ICA-9ZKL-6LLG-B7BJ'] = false,
-    ['ICA-8P52-DW5J-PU7S'] = false,
-    ['ICA-AEWK-4BNX-XJHV'] = false,
-    ['ICA-G8SK-YE9K-PLLD'] = false,
-    ['ICA-JW2H-2B2Z-2L6N'] = false,
-    ['ICA-625P-PDJZ-G7S2'] = false,
-    ['ICA-FBXU-E3NL-T4K9'] = false,
-    ['ICA-6M9R-SK6C-S8PX'] = false,
-    ['ICA-7G6C-UFFY-4T5A'] = false,
-    ['ICA-36YX-PALC-AKC3'] = false,
-    ['ICA-5AUX-TUGB-KHK2'] = false,
-    ['ICA-6ZL4-NLV5-947U'] = false,
-    ['ICA-ZUDR-3NJ2-J5D3'] = false,
-    ['ICA-RWAS-HZJ3-F24Y'] = false,
-    ['ICA-RENS-5NWB-MDHK'] = false,
-    ['ICA-2Y2P-2TBP-AAFH'] = false,
-    ['ICA-KSZ9-UUTC-ABSP'] = false,
-    ['ICA-JN2L-XLJN-9VKV'] = false,
-    ['ICA-MUCR-PF7G-SWBA'] = false,
-    ['ICA-DBNF-DTS2-HY5R'] = false,
-    ['ICA-XLGV-JWAD-EPD5'] = false,
-    ['ICA-LSAU-27FQ-FR6B'] = false,
-    ['ICA-H3LT-KR9C-49DF'] = false,
-    ['ICA-3ZLM-93YF-B3H3'] = false,
-    ['ICA-3HYR-NSGT-A4PC'] = false,
-    ['ICA-P5EV-2G9S-96VJ'] = false,
-    ['ICA-GE8U-Y42U-FPD5'] = false,
-    ['ICA-39DJ-8XK4-XU6Y'] = false,
-    ['ICA-4F27-F65T-XSJM'] = false,
-    ['ICA-YFX6-89M3-TB5S'] = false,
-    ['ICA-8BR5-65B8-JSNW'] = false,
-    ['ICA-HTJK-K3WU-N4QW'] = false,
-    ['ICA-KABT-L7RW-AV4T'] = false,
-    ['ICA-U6SM-M9VD-U3BB'] = false,
-    ['ICA-4QFW-SA4J-6AWX'] = false,
-    ['ICA-D4XP-MGGG-UQKB'] = false,
-    ['ICA-F7BE-LE57-N34U'] = false,
-    ['ICA-XCZA-ST36-BPRS'] = false,
-    ['ICA-DWEL-JFAY-ASW5'] = false,
-    ['ICA-6JRZ-TQRG-4FQ3'] = false,
-    ['ICA-6QYX-3Y8D-BZXU'] = false,
-    ['ICA-5RLK-2M4B-BTG4'] = false,
-    ['ICA-W7FN-AG5T-ZM7M'] = false,
-    ['ICA-YRPV-U58W-AZL6'] = false,
-    ['ICA-WDLJ-VRT6-TA9Y'] = false,
-    ['ICA-UU8D-93FJ-EZWG'] = false,
-    ['ICA-GCJH-YRDS-GM6Z'] = false,
-    ['ICA-YXJU-U269-A37Y'] = false,
-    ['ICA-FDHP-VG2F-PE32'] = false,
-    ['ICA-89VC-59FT-D4SR'] = false,
-    ['ICA-E7TP-63Z9-LHKF'] = false,
-    ['ICA-4PX8-7KD7-2CVR'] = false,
-    ['ICA-EUCH-NDEF-N2SQ'] = false,
-    ['ICA-9Y6Z-WVTN-E7ZM'] = false,
-    ['ICA-ZW4J-63NH-JE4Y'] = false,
-    ['ICA-Z47X-SNX5-RV27'] = false,
-    ['ICA-6UZZ-8ATK-R8PP'] = false,
-    ['ICA-32S9-P6JY-Z7EE'] = false,
-    ['ICA-ENPN-NP99-4E2L'] = false,
-    ['ICA-AEZZ-6BGL-PYR9'] = false,
-    ['ICA-CB7F-H5UF-P969'] = false,
-    ['ICA-6H94-5TW3-JD8H'] = false,
-    ['ICA-9EGS-AV6F-QTX5'] = false,
-    ['ICA-MW7Y-TMXU-WKRF'] = false,
-    ['ICA-9L7E-F2HD-WQUQ'] = false,
-    ['ICA-MVJG-2MEA-5K4L'] = false,
-    ['ICA-Z85E-NJ3G-JYTG'] = false,
-    ['ICA-L242-ML5F-BM9D'] = false,
-    ['ICA-QPQD-45ZW-AQ8C'] = false,
-    ['ICA-WKTJ-TBTR-HPD7'] = false,
-    ['ICA-XHMN-UMCA-ZFK9'] = false,
-    ['ICA-JLPQ-HZX7-3TJ6'] = false,
-    ['ICA-9SAQ-LQFM-P4RP'] = false,
-    ['ICA-YMN7-RMK6-GZJ3'] = false,
-    ['ICA-GAWD-97MV-MRVU'] = false,
- }
-local ICA_ACTIVATION_PATH = getWorkingDirectory() .. '/config/ICA Helper/ica_activation.dat'
+-- Привязка к серийному номеру тома диска, на котором установлена GTA.
+-- Добавляй разрешённые номера сюда: ['30801123'] = true,
+-- Команда /ica_update регистрируется отдельно и работает даже до добавления номера.
+local ICA_ALLOWED_VOLUME_SERIALS = {
+    -- ['1147764179'] = true,
+}
 
--- Автообновление использует только один источник: актуальный Lua-файл на GitHub.
 local ICA_UPDATE_SCRIPT_URL = 'https://raw.githubusercontent.com/ragermann/ica-helper_westland/refs/heads/main/ICA_Helper1'
 local ICA_UPDATE_TEMP_PATH = getWorkingDirectory() .. '/config/ICA Helper/ICA_Helper.lua.update'
 
-local function icaReadActivation()
-    local f = io.open(ICA_ACTIVATION_PATH, 'r')
-    if not f then return nil, nil end
-    local line = f:read('*l') or ''
-    f:close()
-    local key, account = line:match('^([^|]+)|(.+)$')
-    return key, account
-end
+local function icaGetGameVolumeSerial()
+    local ok, serial = pcall(function()
+        local ffi = require 'ffi'
+        pcall(ffi.cdef, [[
+            int __stdcall GetVolumeInformationA(
+                const char* lpRootPathName,
+                char* lpVolumeNameBuffer,
+                unsigned long nVolumeNameSize,
+                unsigned long* lpVolumeSerialNumber,
+                unsigned long* lpMaximumComponentLength,
+                unsigned long* lpFileSystemFlags,
+                char* lpFileSystemNameBuffer,
+                unsigned long nFileSystemNameSize
+            );
+        ]])
 
-local function icaSaveActivation(key, account)
-    local dir = ICA_ACTIVATION_PATH:match('^(.+)/[^/]+$')
-    local configDir = getWorkingDirectory() .. '/config'
-    if not doesDirectoryExist(configDir) then createDirectory(configDir) end
-    if dir and not doesDirectoryExist(dir) then createDirectory(dir) end
-    local f = io.open(ICA_ACTIVATION_PATH, 'w')
-    if not f then return false end
-    f:write(key, '|', account, '\n')
-    f:close()
-    -- Hide the activation record in Windows Explorer (not encryption/security).
-    if package.config:sub(1, 1) == '\\' then
-        os.execute('attrib +h "' .. ICA_ACTIVATION_PATH .. '" >nul 2>nul')
-    end
-    return true
-end
-
-local function icaCurrentAccount()
-    local ok, name = pcall(function()
-        local playerId = select(2, sampGetPlayerIdByCharHandle(PLAYER_PED))
-        return sampGetPlayerNickname(playerId)
+        local gamePath = getGameDirectory()
+        if type(gamePath) ~= 'string' then return nil end
+        local drive = gamePath:match('^%s*([A-Za-z]:)')
+        if not drive then return nil end
+        local root = drive .. '\\'
+        local volumeSerial = ffi.new('unsigned long[1]')
+        local volumeName = ffi.new('char[261]')
+        local fileSystemName = ffi.new('char[261]')
+        local kernel32 = ffi.load('kernel32')
+        local success = kernel32.GetVolumeInformationA(
+            root, volumeName, 260, volumeSerial, nil, nil, fileSystemName, 260
+        )
+        if success == 0 then return nil end
+        return tostring(tonumber(volumeSerial[0]))
     end)
-    if ok and type(name) == 'string' and name ~= '' then return name end
+    if ok then return serial end
     return nil
 end
 
-local function icaIsActivated(account)
-    local key, savedAccount = icaReadActivation()
-    return key ~= nil and ICA_ACTIVATION_KEYS[key] == true and savedAccount == account
+local function icaCopySerialToClipboard(serial)
+    if type(serial) ~= 'string' or serial == '' then return false end
+    local ok, copied = pcall(function()
+        local ffi = require 'ffi'
+        pcall(ffi.cdef, 'void* __stdcall GlobalAlloc(unsigned int uFlags, size_t dwBytes);')
+        pcall(ffi.cdef, 'void* __stdcall GlobalLock(void* hMem);')
+        pcall(ffi.cdef, 'int __stdcall GlobalUnlock(void* hMem);')
+        pcall(ffi.cdef, 'void* __stdcall GlobalFree(void* hMem);')
+        pcall(ffi.cdef, 'int __stdcall OpenClipboard(void* hWndNewOwner);')
+        pcall(ffi.cdef, 'int __stdcall EmptyClipboard(void);')
+        pcall(ffi.cdef, 'void* __stdcall SetClipboardData(unsigned int uFormat, void* hMem);')
+        pcall(ffi.cdef, 'int __stdcall CloseClipboard(void);')
+
+        local kernel32 = ffi.load('kernel32')
+        local user32 = ffi.load('user32')
+        local size = #serial + 1
+        local memory = kernel32.GlobalAlloc(0x0002, size) -- GMEM_MOVEABLE
+        if memory == nil then return false end
+        local pointer = kernel32.GlobalLock(memory)
+        if pointer == nil then kernel32.GlobalFree(memory); return false end
+        ffi.copy(pointer, serial, size)
+        kernel32.GlobalUnlock(memory)
+
+        if user32.OpenClipboard(nil) == 0 then
+            kernel32.GlobalFree(memory)
+            return false
+        end
+        user32.EmptyClipboard()
+        local result = user32.SetClipboardData(1, memory) -- CF_TEXT
+        user32.CloseClipboard()
+        if result == nil then kernel32.GlobalFree(memory); return false end
+        return true
+    end)
+    return ok and copied == true
 end
 
-local function icaWaitForActivation()
-    local account = icaCurrentAccount()
-    if not account then
-        sampAddChatMessage('{B22222}[ICA Helper] Не удалось определить игровой аккаунт.', -1)
-        return false
-    end
-    if icaIsActivated(account) then return true end
+local function icaIsDriveAuthorized()
+    local serial = icaGetGameVolumeSerial()
+    return serial ~= nil and ICA_ALLOWED_VOLUME_SERIALS[serial] == true, serial
+end
 
-    local savedKey, savedAccount = icaReadActivation()
-    if savedKey and savedAccount ~= account then
-        sampAddChatMessage('{B22222}[ICA Helper] Этот экземпляр уже привязан к аккаунту '..savedAccount..'.', -1)
-        sampAddChatMessage('{FFFFFF}Для переноса обратитесь к {00BFFF}@ragermann{FFFFFF} в Telegram.', -1)
-        return false
+local function icaWaitForDriveAuthorization()
+    local allowed, serial = icaIsDriveAuthorized()
+    if allowed then
+        sampAddChatMessage('{00FF00}[ICA Helper] Серийный номер диска подтверждён.', -1)
+        return true
     end
 
-    sampAddChatMessage('{B22222}[ICA Helper] Скрипт не активирован.', -1)
-    sampAddChatMessage('{FFFFFF}Для получения ключа напишите {00BFFF}@ragermann{FFFFFF} в Telegram.', -1)
-    sampAddChatMessage('{FFFFFF}После получения введите: {00FF00}/ica_key ВАШ_КЛЮЧ', -1)
-    sampRegisterChatCommand('ica_key', function(arg)
-        local key = tostring(arg or ''):upper():gsub('%s+', '')
-        local currentAccount = icaCurrentAccount()
-        if not currentAccount then return end
-        local oldKey, oldAccount = icaReadActivation()
-        if oldKey and oldAccount ~= currentAccount then
-            sampAddChatMessage('{B22222}[ICA Helper] Лицензия уже привязана к другому аккаунту.', -1)
-            return
+    if serial then
+        local copied = icaCopySerialToClipboard(serial)
+        sampAddChatMessage('{B22222}[ICA Helper] Этот диск пока не добавлен в список доступа. Серийный номер тома GTA: {FFFFFF}' .. serial, -1)
+        if copied then
+            sampAddChatMessage('{00FF00}[ICA Helper] Серийный номер автоматически скопирован в буфер обмена. Отправьте его разработчику.', -1)
+        else
+            sampAddChatMessage('{FFFF00}[ICA Helper] Не удалось скопировать номер автоматически — скопируйте его из сообщения выше.', -1)
         end
-        if not ICA_ACTIVATION_KEYS[key] then
-            sampAddChatMessage('{B22222}[ICA Helper] Неверный ключ.', -1)
-            return
+    else
+        sampAddChatMessage('{B22222}[ICA Helper] Не удалось определить серийный номер тома диска с GTA.', -1)
+    end
+    sampAddChatMessage('{FFFFFF}Обновление доступно командой {00FF00}/ica_update{FFFFFF}; пока номер не добавлен в список, функции скрипта недоступны.', -1)
+    while true do
+        wait(1000)
+        local nowAllowed = icaIsDriveAuthorized()
+        if nowAllowed then
+            sampAddChatMessage('{00FF00}[ICA Helper] Серийный номер диска подтверждён.', -1)
+            return true
         end
-        if not icaSaveActivation(key, currentAccount) then
-            sampAddChatMessage('{B22222}[ICA Helper] Не удалось сохранить активацию. Проверьте права на папку config.', -1)
-            return
-        end
-        sampAddChatMessage('{00FF00}[ICA Helper] Активация сохранена для '..currentAccount..'. Перезапустите скрипт: CTRL + R', -1)
-    end)
-    -- Блокируем функциональность до перезапуска после ввода ключа.
-    while true do wait(1000) end
+    end
 end
 
 local function icaVersionParts(value)
@@ -1876,23 +1581,6 @@ local function icaReadVersionFromScript(source)
     local number = source:match('local%s+script_version%s*=%s*(%d+)')
     if not version or not number then return nil end
     return version .. ' ' .. number
-end
-
--- Сравниваем список ключей отдельно от версии скрипта.
--- Поэтому смена false на true в файле на GitHub тоже вызовет уведомление.
-local function icaReadActivationKeysBlock(source)
-    if type(source) ~= 'string' then return nil end
-    return source:match('local ICA_ACTIVATION_KEYS%s*=%s*({.-})%s*local ICA_ACTIVATION_PATH')
-end
-
-local function icaLocalActivationKeysBlock()
-    local ok, path = pcall(function() return thisScript().path end)
-    if not ok or not path then return nil end
-    local f = io.open(path, 'rb')
-    if not f then return nil end
-    local source = f:read('*a') or ''
-    f:close()
-    return icaReadActivationKeysBlock(source)
 end
 
 local function icaInstallUpdate()
@@ -1941,6 +1629,16 @@ local function icaInstallUpdate()
         if check then check:close() end
         if downloaded == '' or not downloaded:find('script_version', 1, true) then
             sampAddChatMessage('{B22222}[ICA Helper] GitHub-файл пустой или не содержит версию. Оригинал не изменён.', -1)
+            os.remove(tempPath)
+            return
+        end
+
+        -- Устанавливаем файл только если на GitHub опубликована версия новее.
+        -- Добавление серийника без повышения версии не меняет установленный скрипт.
+        local latestVersion = icaReadVersionFromScript(downloaded)
+        local currentVersion = tostring(text_version) .. ' ' .. tostring(script_version)
+        if not latestVersion or not icaVersionGreater(latestVersion, currentVersion) then
+            sampAddChatMessage('{FFFF00}[ICA Helper] Нового обновления пока нет. Дождитесь сообщения о выходе новой версии.', -1)
             os.remove(tempPath)
             return
         end
@@ -2043,16 +1741,9 @@ local function icaCheckForUpdates()
         local latestVersion = icaReadVersionFromScript(source)
         local currentVersion = tostring(text_version) .. ' ' .. tostring(script_version)
         local versionChanged = latestVersion and icaVersionGreater(latestVersion, currentVersion)
-        local remoteKeys = icaReadActivationKeysBlock(source)
-        local localKeys = icaLocalActivationKeysBlock()
-        local activationKeysChanged = remoteKeys ~= nil and localKeys ~= nil and remoteKeys ~= localKeys
-
         if versionChanged then
             sampAddChatMessage('{00BFFF}[ICA Helper] Доступно обновление ('..latestVersion..').', -1)
             sampAddChatMessage('{FFFFFF}Для установки введите {00FF00}/ica_update{FFFFFF}.', -1)
-        elseif activationKeysChanged then
-            sampAddChatMessage('{00BFFF}[ICA Helper] Обновлён список ключей активации.', -1)
-            sampAddChatMessage('{FFFFFF}Чтобы получить новые ключи, обновите скрипт: {00FF00}/ica_update{FFFFFF}.', -1)
         end
     end)
 end
@@ -2062,12 +1753,23 @@ function main()
     while not isSampAvailable() do wait(100) end
 
     repeat wait(500) until sampIsLocalPlayerSpawned() and isCharOnScreen(PLAYER_PED)
-    if not icaWaitForActivation() then return end
-    -- Команда доступна независимо от того, обнаружено ли обновление.
+    -- Обновление регистрируется ДО проверки номера диска, чтобы оно работало
+    -- даже если серийный номер ещё не добавлен в разрешённый список.
     sampRegisterChatCommand('ica_update', function()
         icaInstallUpdate()
     end)
+    sampRegisterChatCommand('ica_serial', function()
+        local serial = icaGetGameVolumeSerial()
+        if serial and icaCopySerialToClipboard(serial) then
+            sampAddChatMessage('{00FF00}[ICA Helper] Серийный номер ' .. serial .. ' скопирован. Отправьте его разработчику.', -1)
+        elseif serial then
+            sampAddChatMessage('{FFFF00}[ICA Helper] Ваш серийный номер: {FFFFFF}' .. serial .. ' {FFFF00}(не удалось скопировать автоматически).', -1)
+        else
+            sampAddChatMessage('{B22222}[ICA Helper] Не удалось определить серийный номер тома GTA.', -1)
+        end
+    end)
     icaCheckForUpdates()
+    icaWaitForDriveAuthorization()
     changelog = [[{cc0000}Версия 2.6{ffffff}
     - Фиксы под сампик роле плау =/
     

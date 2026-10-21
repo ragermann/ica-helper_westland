@@ -1768,7 +1768,7 @@ local ICA_ACTIVATION_KEYS = {
 local ICA_ACTIVATION_PATH = getWorkingDirectory() .. '/config/ICA Helper/ica_activation.dat'
 
 -- Автообновление использует только один источник: актуальный Lua-файл на GitHub.
-local ICA_UPDATE_SCRIPT_URL = 'https://raw.githubusercontent.com/ragermann/ica-helper_westland/main/ICA_Helper_GoogleDrive_repaired_cp1251.lua'
+local ICA_UPDATE_SCRIPT_URL = 'https://raw.githubusercontent.com/ragermann/ica-helper_westland/refs/heads/main/ICA_Helper_GitHub_autoupdate.lua'
 local ICA_UPDATE_TEMP_PATH = getWorkingDirectory() .. '/config/ICA Helper/ICA_Helper.lua.update'
 
 local function icaReadActivation()

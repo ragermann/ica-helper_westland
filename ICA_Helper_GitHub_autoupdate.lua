@@ -2,7 +2,7 @@ require 'lib.sampfuncs'
 require 'lib.moonloader'
 local script_version = 122 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
-local text_version = '3.6' -- версия для отображения; для автообновления сравнивается вместе с script_version
+local text_version = '3.5' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
 local nametagEnabled = true -- включён до тех пор, пока сервер не сообщит об отключении
 local dlstatus = require('moonloader').download_status
@@ -1768,7 +1768,7 @@ local ICA_ACTIVATION_KEYS = {
 local ICA_ACTIVATION_PATH = getWorkingDirectory() .. '/config/ICA Helper/ica_activation.dat'
 
 -- Автообновление использует только один источник: актуальный Lua-файл на GitHub.
-local ICA_UPDATE_SCRIPT_URL = 'https://raw.githubusercontent.com/ragermann/ica-helper_westland/refs/heads/main/ICA_Helper_GitHub_autoupdate.lua'
+local ICA_UPDATE_SCRIPT_URL = 'https://raw.githubusercontent.com/ragermann/ica-helper_westland/main/ICA_Helper_GoogleDrive_repaired_cp1251.lua'
 local ICA_UPDATE_TEMP_PATH = getWorkingDirectory() .. '/config/ICA Helper/ICA_Helper.lua.update'
 
 local function icaReadActivation()

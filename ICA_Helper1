@@ -1980,7 +1980,7 @@ local function icaInstallUpdate()
         end
 
         sampAddChatMessage('{00FF00}[ICA Helper] Обновление установлено без создания резервной копии.', -1)
-        sampAddChatMessage('{FFFFFF}Перезапустите скрипт командой {00FF00}/hh_reload{FFFFFF}.', -1)
+        sampAddChatMessage('{FFFFFF}Перезапустите скрипт клавишами {00FF00}CTRL + R ( или перезайдите в игру ){FFFFFF}.', -1)
     end)
 end
 

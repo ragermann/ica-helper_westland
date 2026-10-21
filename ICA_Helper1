@@ -1445,7 +1445,7 @@ local newFrame = imgui.OnFrame(
 -- Добавляй разрешённые номера сюда: ['30801123'] = true,
 -- Команда /ica_update регистрируется отдельно и работает даже до добавления номера.
 local ICA_ALLOWED_VOLUME_SERIALS = {
-    -- ['1147764179'] = true,
+     ['1147764179'] = true,
 }
 
 local ICA_UPDATE_SCRIPT_URL = 'https://raw.githubusercontent.com/ragermann/ica-helper_westland/refs/heads/main/ICA_Helper1'

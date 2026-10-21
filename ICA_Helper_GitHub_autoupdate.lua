@@ -2,7 +2,7 @@ require 'lib.sampfuncs'
 require 'lib.moonloader'
 local script_version = 122 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
-local text_version = '3.5' -- версия для отображения; для автообновления сравнивается вместе с script_version
+local text_version = '3.6' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
 local nametagEnabled = true -- включён до тех пор, пока сервер не сообщит об отключении
 local dlstatus = require('moonloader').download_status
@@ -1919,13 +1919,29 @@ local function icaInstallUpdate()
             return
         end
 
-        local check = io.open(tempPath, 'r')
+        local check = io.open(tempPath, 'rb')
         local downloaded = check and (check:read('*a') or '') or ''
         if check then check:close() end
         if downloaded == '' or not downloaded:find('script_version', 1, true) or not downloaded:find('function main', 1, true) then
             sampAddChatMessage('{B22222}[ICA Helper] GitHub вернул пустой или некорректный файл .lua. Оригинал не изменён.', -1)
             os.remove(tempPath)
             return
+        end
+
+        -- MoonLoader скрипт использует CP1251, а GitHub обычно отдаёт UTF-8.
+        -- Пробуем преобразовать скачанный UTF-8 в текущую кодировку скрипта.
+        local conversionOk, converted = pcall(function()
+            return encoding.UTF8:decode(downloaded)
+        end)
+        if conversionOk and type(converted) == 'string' and converted ~= '' then
+            local out = io.open(tempPath, 'wb')
+            if not out then
+                sampAddChatMessage('{B22222}[ICA Helper] Не удалось подготовить файл обновления.', -1)
+                os.remove(tempPath)
+                return
+            end
+            out:write(converted)
+            out:close()
         end
 
         local compiled, compileErr = loadfile(tempPath)

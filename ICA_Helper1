@@ -1,8 +1,8 @@
 require 'lib.sampfuncs'
 require 'lib.moonloader'
-local script_version = 130 --[[ Используется для автообновления, во избежание проблем 
+local script_version = 131 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
-local text_version = '5.0' -- версия для отображения; для автообновления сравнивается вместе с script_version
+local text_version = '5.2' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
 local nametagEnabled = true -- включён до тех пор, пока сервер не сообщит об отключении
 local dlstatus = require('moonloader').download_status
@@ -1878,6 +1878,23 @@ local function icaReadVersionFromScript(source)
     return version .. ' ' .. number
 end
 
+-- Сравниваем список ключей отдельно от версии скрипта.
+-- Поэтому смена false на true в файле на GitHub тоже вызовет уведомление.
+local function icaReadActivationKeysBlock(source)
+    if type(source) ~= 'string' then return nil end
+    return source:match('local ICA_ACTIVATION_KEYS%s*=%s*({.-})%s*local ICA_ACTIVATION_PATH')
+end
+
+local function icaLocalActivationKeysBlock()
+    local ok, path = pcall(function() return thisScript().path end)
+    if not ok or not path then return nil end
+    local f = io.open(path, 'rb')
+    if not f then return nil end
+    local source = f:read('*a') or ''
+    f:close()
+    return icaReadActivationKeysBlock(source)
+end
+
 local function icaInstallUpdate()
     lua_thread.create(function()
         sampAddChatMessage('{FFFFFF}[ICA Helper] Скачиваю обновление с GitHub...', -1)
@@ -2031,9 +2048,17 @@ local function icaCheckForUpdates()
 
         local latestVersion = icaReadVersionFromScript(source)
         local currentVersion = tostring(text_version) .. ' ' .. tostring(script_version)
-        if latestVersion and icaVersionGreater(latestVersion, currentVersion) then
+        local versionChanged = latestVersion and icaVersionGreater(latestVersion, currentVersion)
+        local remoteKeys = icaReadActivationKeysBlock(source)
+        local localKeys = icaLocalActivationKeysBlock()
+        local activationKeysChanged = remoteKeys ~= nil and localKeys ~= nil and remoteKeys ~= localKeys
+
+        if versionChanged then
             sampAddChatMessage('{00BFFF}[ICA Helper] Доступно обновление ('..latestVersion..').', -1)
             sampAddChatMessage('{FFFFFF}Для установки введите {00FF00}/ica_update{FFFFFF}.', -1)
+        elseif activationKeysChanged then
+            sampAddChatMessage('{00BFFF}[ICA Helper] Обновлён список ключей активации.', -1)
+            sampAddChatMessage('{FFFFFF}Чтобы получить новые ключи, обновите скрипт: {00FF00}/ica_update{FFFFFF}.', -1)
         end
     end)
 end

@@ -2,7 +2,7 @@ require 'lib.sampfuncs'
 require 'lib.moonloader'
 local script_version = 122 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
-local text_version = '3.5' -- версия для отображения; для автообновления сравнивается вместе с script_version
+local text_version = '3.6' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
 local nametagEnabled = true -- включён до тех пор, пока сервер не сообщит об отключении
 local dlstatus = require('moonloader').download_status

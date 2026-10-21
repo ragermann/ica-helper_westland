@@ -1,6 +1,6 @@
 require 'lib.sampfuncs'
 require 'lib.moonloader'
-local script_version = 002 --[[ Используется для автообновления, во избежание проблем 
+local script_version = 003 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
 local text_version = '5.3' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
@@ -1985,8 +1985,8 @@ local function icaInstallUpdate()
             return
         end
 
-        sampAddChatMessage('{00FF00}[ICA Helper] Обновление установлено. Резервная копия: '..backupPath, -1)
-        sampAddChatMessage('{FFFFFF}Перезапустите скрипт командой {00FF00}/hh_reload{FFFFFF}.', -1)
+        sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Обновление установлено. '..backupPath, -1)
+        sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Перезапустите скрипт cочетанием клавиш {850000}CTRL+R.', -1)
     end)
 end
 
@@ -2007,7 +2007,7 @@ local function icaCheckForUpdates()
             end)
         end)
         if not ok then
-            sampAddChatMessage('{B22222}[ICA Helper] Ошибка проверки обновлений: '..tostring(err), -1)
+            sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Ошибка проверки обновлений: '..tostring(err), -1)
             return
         end
 
@@ -2054,8 +2054,8 @@ local function icaCheckForUpdates()
         local activationKeysChanged = remoteKeys ~= nil and localKeys ~= nil and remoteKeys ~= localKeys
 
         if versionChanged then
-            sampAddChatMessage('{00BFFF}[ICA Helper] Доступно обновление ('..latestVersion..').', -1)
-            sampAddChatMessage('{FFFFFF}Для установки введите {00FF00}/ica_update{FFFFFF}.', -1)
+            sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Доступно обновление ('..latestVersion..').', -1)
+            sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Для установки введите {850000}/ica_update{FFFFFF}.', -1)
         elseif activationKeysChanged then
             sampAddChatMessage('{00BFFF}[ICA Helper] Обновлён список ключей активации.', -1)
             sampAddChatMessage('{FFFFFF}Чтобы получить новые ключи, обновите скрипт: {00FF00}/ica_update{FFFFFF}.', -1)

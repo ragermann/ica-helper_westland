@@ -1813,21 +1813,21 @@ end
 local function icaWaitForActivation()
     local account = icaCurrentAccount()
     if not account then
-        sampAddChatMessage('{B22222}[ICA Helper] Не удалось определить игровой аккаунт.', -1)
+        sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Не удалось определить игровой аккаунт.', -1)
         return false
     end
     if icaIsActivated(account) then return true end
 
     local savedKey, savedAccount = icaReadActivation()
     if savedKey and savedAccount ~= account then
-        sampAddChatMessage('{B22222}[ICA Helper] Этот экземпляр уже привязан к аккаунту '..savedAccount..'.', -1)
-        sampAddChatMessage('{FFFFFF}Для переноса обратитесь к {00BFFF}@ragermann{FFFFFF} в Telegram.', -1)
+        sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Этот экземпляр уже привязан к аккаунту '..savedAccount..'.', -1)
+        sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Для переноса обратитесь к {00BFFF}@ragermann{FFFFFF} в Telegram.', -1)
         return false
     end
 
-    sampAddChatMessage('{B22222}[ICA Helper] Скрипт не активирован.', -1)
-    sampAddChatMessage('{FFFFFF}Для получения ключа напишите {00BFFF}@ragermann{FFFFFF} в Telegram.', -1)
-    sampAddChatMessage('{FFFFFF}После получения введите: {00FF00}/ica_key ВАШ_КЛЮЧ', -1)
+    sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Скрипт не активирован.', -1)
+    sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Для получения ключа напишите {00BFFF}@ragermann{FFFFFF} в Telegram.', -1)
+    sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: После получения введите: {850000}/ica_key {CCCCCC}ВАШ_КЛЮЧ', -1)
     sampRegisterChatCommand('ica_key', function(arg)
         local key = tostring(arg or ''):upper():gsub('%s+', '')
         local currentAccount = icaCurrentAccount()
@@ -1969,17 +1969,23 @@ local function icaInstallUpdate()
         end
 
         local currentPath = thisScript().path
-        -- Резервная копия старой версии не создаётся.
-        os.remove(currentPath)
-
-        local installed, installErr = os.rename(tempPath, currentPath)
-        if not installed then
-            sampAddChatMessage('{B22222}[ICA Helper] Не удалось заменить файл: '..tostring(installErr)..'. Резервная копия отключена.', -1)
+        local backupPath = currentPath .. '.bak'
+        os.remove(backupPath)
+        local renamed, renameErr = os.rename(currentPath, backupPath)
+        if not renamed then
+            sampAddChatMessage('{B22222}[ICA Helper] Не удалось создать резервную копию: '..tostring(renameErr), -1)
             os.remove(tempPath)
             return
         end
 
-        sampAddChatMessage('{00FF00}[ICA Helper] Обновление установлено без создания резервной копии.', -1)
+        local installed, installErr = os.rename(tempPath, currentPath)
+        if not installed then
+            os.rename(backupPath, currentPath)
+            sampAddChatMessage('{B22222}[ICA Helper] Не удалось заменить файл: '..tostring(installErr)..'. Оригинал восстановлен.', -1)
+            return
+        end
+
+        sampAddChatMessage('{00FF00}[ICA Helper] Обновление установлено. Резервная копия: '..backupPath, -1)
         sampAddChatMessage('{FFFFFF}Перезапустите скрипт командой {00FF00}/hh_reload{FFFFFF}.', -1)
     end)
 end

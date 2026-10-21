@@ -1,6 +1,6 @@
 require 'lib.sampfuncs'
 require 'lib.moonloader'
-local script_version = 008 --[[ Используется для автообновления, во избежание проблем 
+local script_version = 009 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
 local text_version = '1.0' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
@@ -1445,9 +1445,9 @@ local newFrame = imgui.OnFrame(
 -- Добавляй разрешённые номера сюда: ['30801123'] = true,
 -- Команда /ica_update регистрируется отдельно и работает даже до добавления номера.
 local ICA_ALLOWED_VOLUME_SERIALS = {
-     ['33333333'] = true,
-     ['1147764179'] = true,
      ['116700331'] = true,
+     ['1147764179'] = true,
+
 }
 
 local ICA_UPDATE_SCRIPT_URL = 'https://raw.githubusercontent.com/ragermann/ica-helper_westland/refs/heads/main/ICA_Helper1'

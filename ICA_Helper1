@@ -2,7 +2,7 @@ require 'lib.sampfuncs'
 require 'lib.moonloader'
 local script_version = 130 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
-local text_version = '5.1' -- версия для отображения; для автообновления сравнивается вместе с script_version
+local text_version = '5.0' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
 local nametagEnabled = true -- включён до тех пор, пока сервер не сообщит об отключении
 local dlstatus = require('moonloader').download_status
@@ -1445,8 +1445,8 @@ local newFrame = imgui.OnFrame(
 -- ВАЖНО: локальная проверка не может глобально пометить ключ использованным на других ПК.
 local ICA_ACTIVATION_KEYS = {
     ['ICA-D8K5-KLB4-3LEW'] = true,
-    ['ICA-NESS-CMX4-DW9J'] = false,
-    ['ICA-FJTD-QY2U-5U6B'] = false,
+    ['ICA-NESS-CMX4-DW9J'] = true,
+    ['ICA-FJTD-QY2U-5U6B'] = true,
     ['ICA-TFXR-JGCY-2M7Q'] = false,
     ['ICA-MRAE-KS28-LLJ2'] = false,
     ['ICA-DMDS-2PPF-KB59'] = false,

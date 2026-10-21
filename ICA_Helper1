@@ -1,6 +1,6 @@
 require 'lib.sampfuncs'
 require 'lib.moonloader'
-local script_version = 002 --[[ Используется для автообновления, во избежание проблем 
+local script_version = 003 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
 local text_version = '1.0' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
@@ -1845,7 +1845,7 @@ local function icaWaitForActivation()
             sampAddChatMessage('{B22222}[ICA Helper] Не удалось сохранить активацию. Проверьте права на папку config.', -1)
             return
         end
-        sampAddChatMessage('{00FF00}[ICA Helper] Активация сохранена для '..currentAccount..'. Перезапустите скрипт: /hh_reload', -1)
+        sampAddChatMessage('{00FF00}[ICA Helper] Активация сохранена для '..currentAccount..'. Перезапустите скрипт: CTRL + R', -1)
     end)
     -- Блокируем функциональность до перезапуска после ввода ключа.
     while true do wait(1000) end

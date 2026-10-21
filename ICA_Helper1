@@ -1,8 +1,8 @@
 require 'lib.sampfuncs'
 require 'lib.moonloader'
-local script_version = 003 --[[ Используется для автообновления, во избежание проблем 
+local script_version = 002 --[[ Используется для автообновления, во избежание проблем 
 с получением новых обновлений, рекомендуется не изменять. В случае их появления измените значение на "1" ]]
-local text_version = '5.3' -- версия для отображения; для автообновления сравнивается вместе с script_version
+local text_version = '1.0' -- версия для отображения; для автообновления сравнивается вместе с script_version
 local horizontalHud = true -- true: horizontal HUD, false: original vertical HUD
 local nametagEnabled = true -- включён до тех пор, пока сервер не сообщит об отключении
 local dlstatus = require('moonloader').download_status
@@ -1813,21 +1813,21 @@ end
 local function icaWaitForActivation()
     local account = icaCurrentAccount()
     if not account then
-        sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Не удалось определить игровой аккаунт.', -1)
+        sampAddChatMessage('{B22222}[ICA Helper] Не удалось определить игровой аккаунт.', -1)
         return false
     end
     if icaIsActivated(account) then return true end
 
     local savedKey, savedAccount = icaReadActivation()
     if savedKey and savedAccount ~= account then
-        sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Этот экземпляр уже привязан к аккаунту '..savedAccount..'.', -1)
-        sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Для переноса обратитесь к {00BFFF}@ragermann{FFFFFF} в Telegram.', -1)
+        sampAddChatMessage('{B22222}[ICA Helper] Этот экземпляр уже привязан к аккаунту '..savedAccount..'.', -1)
+        sampAddChatMessage('{FFFFFF}Для переноса обратитесь к {00BFFF}@ragermann{FFFFFF} в Telegram.', -1)
         return false
     end
 
-    sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Скрипт не активирован.', -1)
-    sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Для получения ключа напишите {00BFFF}@ragermann{FFFFFF} в Telegram.', -1)
-    sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: После получения введите: {850000}/ica_key {CCCCCC}ВАШ_КЛЮЧ', -1)
+    sampAddChatMessage('{B22222}[ICA Helper] Скрипт не активирован.', -1)
+    sampAddChatMessage('{FFFFFF}Для получения ключа напишите {00BFFF}@ragermann{FFFFFF} в Telegram.', -1)
+    sampAddChatMessage('{FFFFFF}После получения введите: {00FF00}/ica_key ВАШ_КЛЮЧ', -1)
     sampRegisterChatCommand('ica_key', function(arg)
         local key = tostring(arg or ''):upper():gsub('%s+', '')
         local currentAccount = icaCurrentAccount()
@@ -1969,24 +1969,18 @@ local function icaInstallUpdate()
         end
 
         local currentPath = thisScript().path
-        local backupPath = currentPath .. '.bak'
-        os.remove(backupPath)
-        local renamed, renameErr = os.rename(currentPath, backupPath)
-        if not renamed then
-            sampAddChatMessage('{B22222}[ICA Helper] Не удалось создать резервную копию: '..tostring(renameErr), -1)
+        -- Резервная копия старой версии не создаётся.
+        os.remove(currentPath)
+
+        local installed, installErr = os.rename(tempPath, currentPath)
+        if not installed then
+            sampAddChatMessage('{B22222}[ICA Helper] Не удалось заменить файл: '..tostring(installErr)..'. Резервная копия отключена.', -1)
             os.remove(tempPath)
             return
         end
 
-        local installed, installErr = os.rename(tempPath, currentPath)
-        if not installed then
-            os.rename(backupPath, currentPath)
-            sampAddChatMessage('{B22222}[ICA Helper] Не удалось заменить файл: '..tostring(installErr)..'. Оригинал восстановлен.', -1)
-            return
-        end
-
-        sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Обновление установлено. '..backupPath, -1)
-        sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Перезапустите скрипт cочетанием клавиш {850000}CTRL+R.', -1)
+        sampAddChatMessage('{00FF00}[ICA Helper] Обновление установлено без создания резервной копии.', -1)
+        sampAddChatMessage('{FFFFFF}Перезапустите скрипт командой {00FF00}/hh_reload{FFFFFF}.', -1)
     end)
 end
 
@@ -2007,7 +2001,7 @@ local function icaCheckForUpdates()
             end)
         end)
         if not ok then
-            sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Ошибка проверки обновлений: '..tostring(err), -1)
+            sampAddChatMessage('{B22222}[ICA Helper] Ошибка проверки обновлений: '..tostring(err), -1)
             return
         end
 
@@ -2054,8 +2048,8 @@ local function icaCheckForUpdates()
         local activationKeysChanged = remoteKeys ~= nil and localKeys ~= nil and remoteKeys ~= localKeys
 
         if versionChanged then
-            sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Доступно обновление ('..latestVersion..').', -1)
-            sampAddChatMessage('{CCCCCC}[ {850000}ICA Helper {CCCCCC}]: Для установки введите {850000}/ica_update{FFFFFF}.', -1)
+            sampAddChatMessage('{00BFFF}[ICA Helper] Доступно обновление ('..latestVersion..').', -1)
+            sampAddChatMessage('{FFFFFF}Для установки введите {00FF00}/ica_update{FFFFFF}.', -1)
         elseif activationKeysChanged then
             sampAddChatMessage('{00BFFF}[ICA Helper] Обновлён список ключей активации.', -1)
             sampAddChatMessage('{FFFFFF}Чтобы получить новые ключи, обновите скрипт: {00FF00}/ica_update{FFFFFF}.', -1)
